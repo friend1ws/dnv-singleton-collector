@@ -1,5 +1,6 @@
 #! /usr/bin/env python
 
+import sys
 import copy
 import my_utils.seq
 
@@ -96,6 +97,11 @@ def get_dnv_singleton(bam_file, output_file, min_mapping_qual = 30, min_base_qua
         if flags[4] == "0" and prev_base2 == prev_base1 == alt1 == alt2: continue
         if flags[4] == "1" and alt1 == alt2 == next_base1 == next_base2: continue 
 
+        if ref1 == alt1 or ref2 == alt2:
+            print >> sys.stderr, "reference and alternative variants are inconsistent!"
+            print bamfile.getrname(read.tid) +  '\t' + str(pos1) + '\t' + str(pos2) + '\t' + ref1 + '\t' + ref2 + '\t' + alt1 + '\t' + alt2
+            continue
+
         dnv = bamfile.getrname(read.tid) +  '\t' + str(pos1) + '\t' + str(pos2) + '\t' + ref1 + '\t' + ref2 + '\t' + alt1 + '\t' + alt2
         if dnv not in dnv2count: dnv2count[dnv] = 0
 
@@ -116,7 +122,6 @@ def get_dnv_singleton(bam_file, output_file, min_mapping_qual = 30, min_base_qua
         tchr, tpos1, tpos2, tref1, tref2, talt1, talt2 = tdnv.split('\t')
         if bamfile.getrname(read.tid) != tchr or pos1 - int(tpos1) >= 10000:
             if dnv2count[tdnv] == 1: print >> hout, tdnv
-            del dnv2count[tdnv]
 
 
     hout.close()
