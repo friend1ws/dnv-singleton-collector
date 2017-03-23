@@ -1,5 +1,7 @@
 #! /usr/bin/env python
 
+import copy
+import my_utils.seq
 
 def get_dnv_singleton(bam_file, output_file, min_mapping_qual = 30, min_base_qual = 30, max_mismatch_num = 5, 
                       min_edge_mean_base_qual = 20, edge_size_for_qual_check = 5, ignore_edge_size = 12):
@@ -171,5 +173,63 @@ def remove_lowdepth_snp(input_file, pileup_file, output_file, min_depth = 10, ma
             print >> hout, '\t'.join(F)
 
     hout.close()
+
+
+def get_dnv_inv_profile(input_file, dnv_output_file, inv_output_file):
+
+    dnv_ref_list = ["CA", "CC", "CG", "CT", "TA", "TC", "TT", "AC", "AT", "GC"]
+
+    def generate_dnv_pattern():
+        dnv_pattern = []
+        for ref in dnv_ref_list:
+            alt1, alt2 = ["A", "C", "G", "T"], ["A", "C", "G", "T"]
+            alt1.remove(ref[0])
+            alt2.remove(ref[1])
+            for a1 in alt1:
+                for a2 in alt2:
+                    dnv_pattern.append(ref + '>' + a1 + a2)
+
+        return dnv_pattern
+ 
+
+    dnv_pattern = generate_dnv_pattern()
+    dnv_pattern_zero = {}
+    for pat in dnv_pattern:
+        dnv_pattern_zero[pat] = 0
+
+
+    dnv_pattern_count = copy.deepcopy(dnv_pattern_zero)
+    inv_pattern_count = copy.deepcopy(dnv_pattern_zero)
+
+
+    header2ind = {}
+    with open(input_file, 'r') as hin:
+
+        for line in hin:
+            F = line.rstrip('\n').split('\t')
+
+            ref = F[3] + F[4]
+            alt = F[5] + F[6]
+
+            if ref not in dnv_ref_list:
+                ref = my_utils.seq.reverse_complement(ref)
+                alt = my_utils.seq.reverse_complement(alt)
+
+            if int(F[2]) - int(F[1]) == 1:
+                dnv_pattern_count[ref + '>' + alt] = dnv_pattern_count[ref + '>' + alt] + 1
+            else:
+                inv_pattern_count[ref + '>' + alt] = inv_pattern_count[ref + '>' + alt] + 1
+
+
+    hout = open(dnv_output_file, 'w')
+    for dnv in sorted(dnv_pattern_count):
+        print >> hout, dnv + '\t' + str(dnv_pattern_count[dnv])
+    hout.close()
+
+    hout = open(inv_output_file, 'w')
+    for inv in sorted(inv_pattern_count):
+        print >> hout, inv + '\t' + str(inv_pattern_count[inv])
+    hout.close()
+
 
 

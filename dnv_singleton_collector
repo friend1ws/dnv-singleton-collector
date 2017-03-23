@@ -13,8 +13,8 @@ parser.add_argument("bam_file", metavar = "sequence.bam", default = None, type =
 parser.add_argument("reference_genome", metavar = "reference.fa", default = None, type = str,
                     help = "the path to the reference genome sequence")
 
-parser.add_argument("output_file", metavar = "output.txt", default = None, type = str,
-                    help = "the path to output file")
+parser.add_argument("output_prefix", metavar = "output_prefix", default = None, type = str,
+                    help = "the prefix of to output files")
 
 parser.add_argument("--debug", default = False, action = 'store_true', help = "keep intermediate files")
  
