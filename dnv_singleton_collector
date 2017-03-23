@@ -1,0 +1,24 @@
+#! /usr/bin/env python
+
+from dnv_singleton_collector.run import *
+import argparse
+
+parser = argparse.ArgumentParser(prog = "dnv_singleton_collector")
+
+parser.add_argument("--version", action = "version", version = "dnv_singleton_collector-0.1.0")
+
+parser.add_argument("bam_file", metavar = "sequence.bam", default = None, type = str,
+                    help = "the path to the bam file")
+
+parser.add_argument("reference_genome", metavar = "reference.fa", default = None, type = str,
+                    help = "the path to the reference genome sequence")
+
+parser.add_argument("output_file", metavar = "output.txt", default = None, type = str,
+                    help = "the path to output file")
+
+parser.add_argument("--debug", default = False, action = 'store_true', help = "keep intermediate files")
+ 
+args = parser.parse_args()
+
+main(args)
+
